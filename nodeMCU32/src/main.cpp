@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
+#include <ArduinoJson.h>
 
 #define MQTT_SERVER "broker.hivemq.com"
 #define MQTT_PORT 1883
@@ -109,11 +110,17 @@ void loop()
   flow = analogRead(pinFlow);
   press = analogRead(pinPress);
   pm = analogRead(pintPm);
+  DynamicJsonDocument sensorValue(1024);
+  sensorValue["temp"] = String(getValueSensor(3500, 0, 100));
+  sensorValue["pressure"] = String(getValueSensor(2600, 0, 100));
+  sensorValue["flow"] = String(getValueSensor(350, 0, 100));
+  sensorValue["pm"] = String(getValueSensor(300, 0, 100));
+  char out[128];
+  int tmp = serializeJson(sensorValue, out);
+
   //float a = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 
-  String s = '{"temp":"' + String(getValueSensor(3500, 0, 100)) + '","pressure":"' + String(getValueSensor(300, 0, 100)) +
-             '","flow":"' + String(getValueSensor(2600, 0, 100)) + '","pm":"' + String(getValueSensor(270, 0, 100));
-  //client.publish(MQTT_TOPIC, "hi broker!");
-  Serial.println(s);
+  client.publish(MQTT_TOPIC, out);
+  //Serial.println(s);
   delay(3000);
 }
