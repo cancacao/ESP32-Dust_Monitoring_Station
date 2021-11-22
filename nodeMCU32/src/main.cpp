@@ -15,6 +15,22 @@ const long interval = 5000;
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
+const int pinTemp = 32;
+const int pinPress = 33;
+const int pinFlow = 34;
+const int pintPm = 35;
+
+int temp = 0;
+int press = 0;
+int flow = 0;
+int pm = 0;
+
+/* ADC 0 -> 3.3V ~ 0 -> 4095
+    analogRead(GPIO)
+
+
+
+*/
 void setup_wifi()
 {
   Serial.print("Connecting to ");
@@ -64,6 +80,11 @@ void callback(char *topic, byte *payload, unsigned int length)
   Serial.println();
 }
 
+float getValueSensor(int valueRead, float minRange, float maxRange)
+{
+  return ((maxRange - minRange) / 4095.0) * (static_cast<float>(valueRead)) + minRange;
+}
+
 void setup()
 {
   // put your setup code here, to run once:
@@ -84,6 +105,15 @@ void loop()
   {
     connect_to_broker();
   }
-  client.publish(MQTT_TOPIC, "hi broker!");
+  temp = analogRead(pinTemp);
+  flow = analogRead(pinFlow);
+  press = analogRead(pinPress);
+  pm = analogRead(pintPm);
+  //float a = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+  String s = '{"temp":"' + String(getValueSensor(3500, 0, 100)) + '","pressure":"' + String(getValueSensor(300, 0, 100)) +
+             '","flow":"' + String(getValueSensor(2600, 0, 100)) + '","pm":"' + String(getValueSensor(270, 0, 100));
+  //client.publish(MQTT_TOPIC, "hi broker!");
+  Serial.println(s);
   delay(3000);
 }
