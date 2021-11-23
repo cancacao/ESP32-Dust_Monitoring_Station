@@ -7,8 +7,8 @@
 #define MQTT_PORT 1883
 #define MQTT_TOPIC "SYS_GET_DATA"
 
-const char *ssid = "linksys";
-const char *password = "DCS@12345";
+const char *ssid = "Can";
+const char *password = "cancacao112223";
 
 unsigned long previousMillis = 0;
 const long interval = 5000;
@@ -111,16 +111,14 @@ void loop()
   press = analogRead(pinPress);
   pm = analogRead(pintPm);
   DynamicJsonDocument sensorValue(1024);
-  sensorValue["temp"] = String(getValueSensor(3500, 0, 100));
-  sensorValue["pressure"] = String(getValueSensor(2600, 0, 100));
-  sensorValue["flow"] = String(getValueSensor(350, 0, 100));
-  sensorValue["pm"] = String(getValueSensor(300, 0, 100));
+  sensorValue["temp"] = String(getValueSensor(temp, 0, 300));
+  sensorValue["pressure"] = String(getValueSensor(press, 0, 20));
+  sensorValue["flow"] = String(getValueSensor(flow, 0, 1000));
+  sensorValue["pm"] = String(getValueSensor(pm, 0, 1000));
   char out[128];
   int tmp = serializeJson(sensorValue, out);
-
   //float a = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-
   client.publish(MQTT_TOPIC, out);
   //Serial.println(s);
-  delay(3000);
+  delay(15000);
 }
