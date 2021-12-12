@@ -5,7 +5,7 @@
 
 #define MQTT_SERVER "broker.hivemq.com"
 #define MQTT_PORT 1883
-#define MQTT_TOPIC "SYS_GET_DATA"
+#define MQTT_TOPIC "sys_get_data"
 
 const char *ssid = "Can";
 const char *password = "cancacao112223";
@@ -57,7 +57,7 @@ void connect_to_broker()
     clientId += String(random(0xffff), HEX);
     if (client.connect(clientId.c_str()))
     {
-      Serial.println("connected");
+      Serial.println("MQTT connected");
       client.subscribe(MQTT_TOPIC);
     }
     else
@@ -93,7 +93,7 @@ void setup()
   Serial.setTimeout(500);
   setup_wifi();
   client.setServer(MQTT_SERVER, MQTT_PORT);
-  client.setCallback(callback);
+  //client.setCallback(callback);
   connect_to_broker();
   Serial.println("Start transfer");
 }
@@ -111,14 +111,17 @@ void loop()
   press = analogRead(pinPress);
   pm = analogRead(pintPm);
   DynamicJsonDocument sensorValue(1024);
+  // sensorValue["temp"] = String(getValueSensor((rand() % 50) + 1500, 0, 300));
+  // sensorValue["pressure"] = String(getValueSensor((rand() % 50) + 2500, 0, 2000));
+  // sensorValue["flow"] = String(getValueSensor((rand() % 50) + 4200, 0, 50000));
+  // sensorValue["pm"] = String(getValueSensor((rand() % 20) + 700, 0, 600));
   sensorValue["temp"] = String(getValueSensor(temp, 0, 300));
-  sensorValue["pressure"] = String(getValueSensor(press, 0, 20));
-  sensorValue["flow"] = String(getValueSensor(flow, 0, 1000));
-  sensorValue["pm"] = String(getValueSensor(pm, 0, 1000));
+  sensorValue["pressure"] = String(getValueSensor(press, 0, 2000));
+  sensorValue["flow"] = String(getValueSensor(flow, 0, 50000));
+  sensorValue["pm"] = String(getValueSensor(pm, 0, 600));
   char out[128];
   int tmp = serializeJson(sensorValue, out);
-  //float a = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
   client.publish(MQTT_TOPIC, out);
-  //Serial.println(s);
+  Serial.println("Published!");
   delay(15000);
 }
